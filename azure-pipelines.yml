@@ -4,7 +4,16 @@
 # https://aka.ms/yaml
 
 trigger:
-- master
+  branches:
+    include:
+    - master
+  paths:
+    include:
+    - Dockerfile
+    - telegraf.conf
+    exclude:
+    - screenshots/*
+    - dashboard/*
 
 name: $(Rev:r)
 
