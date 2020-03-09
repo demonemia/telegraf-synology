@@ -1,4 +1,52 @@
 {
+  "__inputs": [
+    {
+      "name": "DS_SYNOLOGY",
+      "label": "synology",
+      "description": "",
+      "type": "datasource",
+      "pluginId": "influxdb",
+      "pluginName": "InfluxDB"
+    }
+  ],
+  "__requires": [
+    {
+      "type": "panel",
+      "id": "gauge",
+      "name": "Gauge",
+      "version": ""
+    },
+    {
+      "type": "grafana",
+      "id": "grafana",
+      "name": "Grafana",
+      "version": "6.6.2"
+    },
+    {
+      "type": "panel",
+      "id": "graph",
+      "name": "Graph",
+      "version": ""
+    },
+    {
+      "type": "datasource",
+      "id": "influxdb",
+      "name": "InfluxDB",
+      "version": "1.0.0"
+    },
+    {
+      "type": "panel",
+      "id": "singlestat",
+      "name": "Singlestat",
+      "version": ""
+    },
+    {
+      "type": "panel",
+      "id": "table",
+      "name": "Table",
+      "version": ""
+    }
+  ],
   "annotations": {
     "list": [
       {
@@ -16,8 +64,8 @@
   "editable": true,
   "gnetId": 1727,
   "graphTooltip": 0,
-  "id": 2,
-  "iteration": 1560721183105,
+  "id": null,
+  "iteration": 1583713595708,
   "links": [],
   "panels": [
     {
@@ -29,7 +77,7 @@
         "rgba(237, 129, 40, 0.89)",
         "rgba(245, 54, 54, 0.9)"
       ],
-      "datasource": "influxdb",
+      "datasource": "${DS_SYNOLOGY}",
       "format": "none",
       "gauge": {
         "maxValue": 100,
@@ -62,6 +110,7 @@
       "nullPointMode": "connected",
       "nullText": null,
       "options": {},
+      "pluginVersion": "6.6.2",
       "postfix": "",
       "postfixFontSize": "50%",
       "prefix": "",
@@ -82,7 +131,7 @@
       "tableColumn": "",
       "targets": [
         {
-          "alias": "$col",
+          "alias": "$tag_raidName",
           "bucketAggs": [
             {
               "id": "2",
@@ -93,20 +142,7 @@
             }
           ],
           "dsType": "influxdb",
-          "groupBy": [
-            {
-              "params": [
-                "$interval"
-              ],
-              "type": "time"
-            },
-            {
-              "params": [
-                "raidName"
-              ],
-              "type": "tag"
-            }
-          ],
+          "groupBy": [],
           "measurement": "raidTable",
           "metrics": [
             {
@@ -116,6 +152,8 @@
           ],
           "orderByTime": "ASC",
           "policy": "default",
+          "query": "SELECT \"raidStatus\" FROM \"raidTable\" WHERE (\"agent_host\" =~ /^$diskstation$/ AND \"raidName\" =~ /^$volume$/) AND $timeFilter",
+          "rawQuery": false,
           "refId": "A",
           "resultFormat": "time_series",
           "select": [
@@ -125,10 +163,6 @@
                   "raidStatus"
                 ],
                 "type": "field"
-              },
-              {
-                "params": [],
-                "type": "last"
               }
             ]
           ],
@@ -136,7 +170,13 @@
             {
               "key": "agent_host",
               "operator": "=~",
-              "value": "/^$host$/"
+              "value": "/^$diskstation$/"
+            },
+            {
+              "condition": "AND",
+              "key": "raidName",
+              "operator": "=~",
+              "value": "/^$volume$/"
             }
           ],
           "timeField": "@timestamp"
@@ -229,7 +269,7 @@
         "rgba(237, 129, 40, 0.89)",
         "rgba(245, 54, 54, 0.9)"
       ],
-      "datasource": "influxdb",
+      "datasource": "${DS_SYNOLOGY}",
       "format": "none",
       "gauge": {
         "maxValue": 100,
@@ -302,6 +342,8 @@
           ],
           "orderByTime": "ASC",
           "policy": "default",
+          "query": "SELECT \"systemFanStatus\" FROM \"snmp.SYNO\" WHERE (\"agent_host\" =~ /^$diskstation$/) AND $timeFilter",
+          "rawQuery": false,
           "refId": "A",
           "resultFormat": "time_series",
           "select": [
@@ -318,7 +360,7 @@
             {
               "key": "agent_host",
               "operator": "=~",
-              "value": "/^$host$/"
+              "value": "/^$diskstation$/"
             }
           ],
           "timeField": "@timestamp"
@@ -351,6 +393,7 @@
         "rgba(237, 129, 40, 0.89)",
         "#299c46"
       ],
+      "datasource": "${DS_SYNOLOGY}",
       "format": "none",
       "gauge": {
         "maxValue": 100,
@@ -400,27 +443,16 @@
         "lineColor": "rgb(31, 120, 193)",
         "show": false
       },
-      "tableColumn": "last",
+      "tableColumn": "",
       "targets": [
         {
           "alias": "UPS Status",
-          "groupBy": [
-            {
-              "params": [
-                "$__interval"
-              ],
-              "type": "time"
-            },
-            {
-              "params": [
-                "null"
-              ],
-              "type": "fill"
-            }
-          ],
-          "measurement": "snmp.SYNO",
+          "groupBy": [],
+          "measurement": "ups",
           "orderByTime": "ASC",
           "policy": "default",
+          "query": "SELECT \"upsStatus\" FROM \"ups\" WHERE (\"agent_host\" =~ /^$diskstation$/) AND $timeFilter",
+          "rawQuery": false,
           "refId": "A",
           "resultFormat": "time_series",
           "select": [
@@ -430,14 +462,16 @@
                   "upsStatus"
                 ],
                 "type": "field"
-              },
-              {
-                "params": [],
-                "type": "last"
               }
             ]
           ],
-          "tags": []
+          "tags": [
+            {
+              "key": "agent_host",
+              "operator": "=~",
+              "value": "/^$diskstation$/"
+            }
+          ]
         }
       ],
       "thresholds": "",
@@ -472,7 +506,7 @@
         "rgba(237, 129, 40, 0.89)",
         "#d44a3a"
       ],
-      "datasource": "influxdb",
+      "datasource": "${DS_SYNOLOGY}",
       "decimals": 1,
       "format": "dtdurations",
       "gauge": {
@@ -506,6 +540,7 @@
       "nullPointMode": "connected",
       "nullText": null,
       "options": {},
+      "pluginVersion": "6.6.2",
       "postfix": "",
       "postfixFontSize": "50%",
       "prefix": "",
@@ -527,56 +562,43 @@
       "targets": [
         {
           "alias": "",
-          "groupBy": [
-            {
-              "params": [
-                "$__interval"
-              ],
-              "type": "time"
-            },
-            {
-              "params": [
-                "null"
-              ],
-              "type": "fill"
-            }
-          ],
+          "groupBy": [],
           "measurement": "snmp.SYNO",
           "orderByTime": "ASC",
           "policy": "default",
+          "query": "SELECT \"upTime\"  / 100 FROM \"snmp.SYNO\" WHERE (\"agent_host\" =~ /^$diskstation$/) AND $timeFilter",
+          "rawQuery": false,
           "refId": "A",
           "resultFormat": "time_series",
           "select": [
             [
               {
                 "params": [
-                  "sysUpTime"
+                  "upTime"
                 ],
                 "type": "field"
-              },
-              {
-                "params": [],
-                "type": "last"
               },
               {
                 "params": [
                   " / 100"
                 ],
                 "type": "math"
-              },
-              {
-                "params": [
-                  "DS416Play"
-                ],
-                "type": "alias"
               }
             ]
           ],
-          "tags": []
+          "tags": [
+            {
+              "key": "agent_host",
+              "operator": "=~",
+              "value": "/^$diskstation$/"
+            }
+          ]
         }
       ],
       "thresholds": "",
-      "title": "DS416Play Uptime",
+      "timeFrom": null,
+      "timeShift": null,
+      "title": "Uptime",
       "type": "singlestat",
       "valueFontSize": "80%",
       "valueMaps": [
@@ -590,7 +612,7 @@
     },
     {
       "columns": [],
-      "datasource": "influxdb",
+      "datasource": "${DS_SYNOLOGY}",
       "fontSize": "100%",
       "gridPos": {
         "h": 3,
@@ -610,12 +632,14 @@
       },
       "styles": [
         {
+          "align": "auto",
           "dateFormat": "YYYY-MM-DD HH:mm:ss",
           "link": false,
           "pattern": "Time",
           "type": "hidden"
         },
         {
+          "align": "auto",
           "colorMode": null,
           "colors": [
             "rgba(245, 54, 54, 0.9)",
@@ -652,6 +676,8 @@
           ],
           "orderByTime": "ASC",
           "policy": "default",
+          "query": "SELECT last(\"modelName\") AS \"Synology Model\", last(\"version\") AS \"DSM Version\", last(\"serialNumber\") AS \"Serial Number\" FROM \"snmp.SYNO\" WHERE (\"agent_host\" =~ /^$diskstation$/) AND $timeFilter",
+          "rawQuery": false,
           "refId": "A",
           "resultFormat": "table",
           "select": [
@@ -694,7 +720,7 @@
             [
               {
                 "params": [
-                  "upsModel"
+                  "serialNumber"
                 ],
                 "type": "field"
               },
@@ -704,7 +730,7 @@
               },
               {
                 "params": [
-                  "UPS Model"
+                  "Serial Number"
                 ],
                 "type": "alias"
               }
@@ -713,14 +739,14 @@
           "tags": [
             {
               "key": "agent_host",
-              "operator": "=",
-              "value": "192.168.1.5"
+              "operator": "=~",
+              "value": "/^$diskstation$/"
             }
           ],
           "timeField": "@timestamp"
         }
       ],
-      "title": "Synology DS416Play NAS",
+      "title": "Synology NAS",
       "transform": "table",
       "type": "table"
     },
@@ -733,7 +759,7 @@
         "rgba(237, 129, 40, 0.89)",
         "rgba(245, 54, 54, 0.9)"
       ],
-      "datasource": "influxdb",
+      "datasource": "${DS_SYNOLOGY}",
       "format": "none",
       "gauge": {
         "maxValue": 100,
@@ -811,7 +837,10 @@
               "type": "count"
             }
           ],
+          "orderByTime": "ASC",
           "policy": "default",
+          "query": "SELECT \"cpuFanStatus\" FROM \"snmp.SYNO\" WHERE (\"agent_host\" =~ /^$diskstation$/) AND $timeFilter GROUP BY \"agent_host\"",
+          "rawQuery": false,
           "refId": "A",
           "resultFormat": "time_series",
           "select": [
@@ -828,7 +857,7 @@
             {
               "key": "agent_host",
               "operator": "=~",
-              "value": "/^$host$/"
+              "value": "/^$diskstation$/"
             }
           ],
           "timeField": "@timestamp"
@@ -861,7 +890,7 @@
         "rgba(237, 129, 40, 0.89)",
         "rgba(245, 54, 54, 0.9)"
       ],
-      "datasource": "influxdb",
+      "datasource": "${DS_SYNOLOGY}",
       "format": "none",
       "gauge": {
         "maxValue": 100,
@@ -915,23 +944,12 @@
       "targets": [
         {
           "dsType": "influxdb",
-          "groupBy": [
-            {
-              "params": [
-                "$interval"
-              ],
-              "type": "time"
-            },
-            {
-              "params": [
-                "sysName"
-              ],
-              "type": "tag"
-            }
-          ],
+          "groupBy": [],
           "measurement": "snmp.SYNO",
           "orderByTime": "ASC",
           "policy": "default",
+          "query": "SELECT \"systemStatus\" FROM \"snmp.SYNO\" WHERE (\"agent_host\" =~ /^$diskstation$/) AND $timeFilter",
+          "rawQuery": false,
           "refId": "A",
           "resultFormat": "time_series",
           "select": [
@@ -941,14 +959,16 @@
                   "systemStatus"
                 ],
                 "type": "field"
-              },
-              {
-                "params": [],
-                "type": "last"
               }
             ]
           ],
-          "tags": []
+          "tags": [
+            {
+              "key": "agent_host",
+              "operator": "=~",
+              "value": "/^$diskstation$/"
+            }
+          ]
         }
       ],
       "thresholds": "2,2",
@@ -971,22 +991,7 @@
     },
     {
       "cacheTimeout": null,
-      "colorBackground": false,
-      "colorValue": false,
-      "colors": [
-        "#299c46",
-        "rgba(237, 129, 40, 0.89)",
-        "#d44a3a"
-      ],
-      "decimals": 2,
-      "format": "decbytes",
-      "gauge": {
-        "maxValue": 12000000000000,
-        "minValue": 0,
-        "show": true,
-        "thresholdLabels": false,
-        "thresholdMarkers": true
-      },
+      "datasource": "${DS_SYNOLOGY}",
       "gridPos": {
         "h": 5,
         "w": 3,
@@ -994,118 +999,102 @@
         "y": 3
       },
       "id": 22,
-      "interval": null,
       "links": [],
-      "mappingType": 1,
-      "mappingTypes": [
-        {
-          "name": "value to text",
-          "value": 1
+      "options": {
+        "fieldOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "defaults": {
+            "mappings": [
+              {
+                "id": 0,
+                "op": "=",
+                "text": "N/A",
+                "type": 1,
+                "value": "null"
+              }
+            ],
+            "max": 34441858146304,
+            "min": 0,
+            "nullValueMode": "connected",
+            "thresholds": {
+              "mode": "absolute",
+              "steps": [
+                {
+                  "color": "green",
+                  "value": null
+                },
+                {
+                  "color": "yellow",
+                  "value": 25831393609728
+                },
+                {
+                  "color": "red",
+                  "value": 30997672331673
+                }
+              ]
+            },
+            "unit": "bytes"
+          },
+          "overrides": [],
+          "values": false
         },
-        {
-          "name": "range to text",
-          "value": 2
-        }
-      ],
-      "maxDataPoints": 100,
-      "nullPointMode": "connected",
-      "nullText": null,
-      "options": {},
-      "postfix": " / 11.5TB",
-      "postfixFontSize": "50%",
-      "prefix": "",
-      "prefixFontSize": "50%",
-      "rangeMaps": [
-        {
-          "from": "null",
-          "text": "N/A",
-          "to": "null"
-        }
-      ],
-      "sparkline": {
-        "fillColor": "rgba(31, 118, 189, 0.18)",
-        "full": false,
-        "lineColor": "rgb(31, 120, 193)",
-        "show": false
+        "orientation": "horizontal",
+        "showThresholdLabels": false,
+        "showThresholdMarkers": true
       },
-      "tableColumn": "",
+      "pluginVersion": "6.6.2",
       "targets": [
         {
-          "groupBy": [
-            {
-              "params": [
-                "$__interval"
-              ],
-              "type": "time"
-            },
-            {
-              "params": [
-                "null"
-              ],
-              "type": "fill"
-            }
-          ],
+          "groupBy": [],
+          "hide": false,
           "measurement": "raidTable",
           "orderByTime": "ASC",
           "policy": "default",
-          "query": "SELECT -1*(last(\"raidFreeSize\") -11500000000000) AS \"SizeUsed\" FROM \"raidTable\" WHERE $timeFilter GROUP BY time($__interval) fill(previous)",
-          "rawQuery": true,
+          "query": "SELECT \"raidTotalSize\" - raidFreeSize FROM \"raidTable\" WHERE (\"raidName\" =~ /^$volume$/ AND \"agent_host\" =~ /^$diskstation$/) AND $timeFilter",
+          "rawQuery": false,
           "refId": "A",
           "resultFormat": "time_series",
           "select": [
             [
               {
                 "params": [
-                  "raidFreeSize"
+                  "raidTotalSize"
                 ],
                 "type": "field"
               },
               {
-                "params": [],
-                "type": "last"
-              },
-              {
                 "params": [
-                  " / 1000000000"
+                  "- raidFreeSize"
                 ],
                 "type": "math"
               }
             ]
           ],
-          "tags": []
+          "tags": [
+            {
+              "key": "raidName",
+              "operator": "=~",
+              "value": "/^$volume$/"
+            },
+            {
+              "condition": "AND",
+              "key": "agent_host",
+              "operator": "=~",
+              "value": "/^$diskstation$/"
+            }
+          ]
         }
       ],
-      "thresholds": "7000000000000,9000000000000",
+      "timeFrom": null,
+      "timeShift": null,
       "title": "Used Capacity",
-      "type": "singlestat",
-      "valueFontSize": "30%",
-      "valueMaps": [
-        {
-          "op": "=",
-          "text": "N/A",
-          "value": "null"
-        }
-      ],
-      "valueName": "current"
+      "type": "gauge"
     },
     {
       "cacheTimeout": null,
-      "colorBackground": false,
-      "colorValue": true,
-      "colors": [
-        "rgba(50, 172, 45, 0.97)",
-        "rgba(237, 129, 40, 0.89)",
-        "rgba(245, 54, 54, 0.9)"
-      ],
-      "datasource": "influxdb",
-      "format": "none",
-      "gauge": {
-        "maxValue": 100,
-        "minValue": 0,
-        "show": true,
-        "thresholdLabels": false,
-        "thresholdMarkers": true
-      },
+      "datasource": "${DS_SYNOLOGY}",
       "gridPos": {
         "h": 5,
         "w": 3,
@@ -1113,41 +1102,52 @@
         "y": 3
       },
       "id": 11,
-      "interval": null,
       "links": [],
-      "mappingType": 1,
-      "mappingTypes": [
-        {
-          "name": "value to text",
-          "value": 1
+      "options": {
+        "fieldOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "defaults": {
+            "mappings": [
+              {
+                "id": 0,
+                "op": "=",
+                "text": "N/A",
+                "type": 1,
+                "value": "null"
+              }
+            ],
+            "max": 100,
+            "min": 0,
+            "nullValueMode": "connected",
+            "thresholds": {
+              "mode": "absolute",
+              "steps": [
+                {
+                  "color": "green",
+                  "value": null
+                },
+                {
+                  "color": "yellow",
+                  "value": 50
+                },
+                {
+                  "color": "red",
+                  "value": 75
+                }
+              ]
+            },
+            "unit": "celsius"
+          },
+          "overrides": [],
+          "values": false
         },
-        {
-          "name": "range to text",
-          "value": 2
-        }
-      ],
-      "maxDataPoints": 100,
-      "nullPointMode": "connected",
-      "nullText": null,
-      "options": {},
-      "postfix": "°C",
-      "postfixFontSize": "50%",
-      "prefix": "",
-      "prefixFontSize": "50%",
-      "rangeMaps": [
-        {
-          "from": "null",
-          "text": "N/A",
-          "to": "null"
-        }
-      ],
-      "sparkline": {
-        "fillColor": "rgba(31, 118, 189, 0.18)",
-        "full": false,
-        "lineColor": "rgb(31, 120, 193)",
-        "show": false
+        "orientation": "horizontal",
+        "showThresholdLabels": false,
+        "showThresholdMarkers": true
       },
-      "tableColumn": "",
+      "pluginVersion": "6.6.2",
       "targets": [
         {
           "bucketAggs": [
@@ -1160,14 +1160,7 @@
             }
           ],
           "dsType": "influxdb",
-          "groupBy": [
-            {
-              "params": [
-                "$interval"
-              ],
-              "type": "time"
-            }
-          ],
+          "groupBy": [],
           "hide": false,
           "measurement": "snmp.SYNO",
           "metrics": [
@@ -1178,6 +1171,8 @@
           ],
           "orderByTime": "ASC",
           "policy": "default",
+          "query": "SELECT \"temperature\" FROM \"snmp.SYNO\" WHERE (\"agent_host\" =~ /^$diskstation$/) AND $timeFilter",
+          "rawQuery": false,
           "refId": "A",
           "resultFormat": "time_series",
           "select": [
@@ -1187,10 +1182,6 @@
                   "temperature"
                 ],
                 "type": "field"
-              },
-              {
-                "params": [],
-                "type": "last"
               }
             ]
           ],
@@ -1198,42 +1189,18 @@
             {
               "key": "agent_host",
               "operator": "=~",
-              "value": "/^$host$/"
+              "value": "/^$diskstation$/"
             }
           ],
           "timeField": "@timestamp"
         }
       ],
-      "thresholds": "50,75",
       "title": "System temperature",
-      "type": "singlestat",
-      "valueFontSize": "80%",
-      "valueMaps": [
-        {
-          "op": "=",
-          "text": "N/A",
-          "value": "null"
-        }
-      ],
-      "valueName": "current"
+      "type": "gauge"
     },
     {
       "cacheTimeout": null,
-      "colorBackground": false,
-      "colorValue": true,
-      "colors": [
-        "#d44a3a",
-        "rgba(237, 129, 40, 0.89)",
-        "#299c46"
-      ],
-      "format": "percent",
-      "gauge": {
-        "maxValue": 100,
-        "minValue": 0,
-        "show": true,
-        "thresholdLabels": false,
-        "thresholdMarkers": true
-      },
+      "datasource": "${DS_SYNOLOGY}",
       "gridPos": {
         "h": 5,
         "w": 3,
@@ -1241,61 +1208,61 @@
         "y": 3
       },
       "id": 26,
-      "interval": null,
       "links": [],
-      "mappingType": 1,
-      "mappingTypes": [
-        {
-          "name": "value to text",
-          "value": 1
+      "options": {
+        "fieldOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "defaults": {
+            "mappings": [
+              {
+                "id": 0,
+                "op": "=",
+                "text": "N/A",
+                "type": 1,
+                "value": "null"
+              }
+            ],
+            "max": 100,
+            "min": 0,
+            "nullValueMode": "connected",
+            "thresholds": {
+              "mode": "absolute",
+              "steps": [
+                {
+                  "color": "red",
+                  "value": null
+                },
+                {
+                  "color": "yellow",
+                  "value": 10
+                },
+                {
+                  "color": "green",
+                  "value": 50
+                }
+              ]
+            },
+            "unit": "percent"
+          },
+          "overrides": [],
+          "values": false
         },
-        {
-          "name": "range to text",
-          "value": 2
-        }
-      ],
-      "maxDataPoints": 100,
-      "nullPointMode": "connected",
-      "nullText": null,
-      "options": {},
-      "postfix": "",
-      "postfixFontSize": "50%",
-      "prefix": "",
-      "prefixFontSize": "50%",
-      "rangeMaps": [
-        {
-          "from": "null",
-          "text": "N/A",
-          "to": "null"
-        }
-      ],
-      "sparkline": {
-        "fillColor": "rgba(31, 118, 189, 0.18)",
-        "full": true,
-        "lineColor": "rgb(31, 120, 193)",
-        "show": false
+        "orientation": "horizontal",
+        "showThresholdLabels": false,
+        "showThresholdMarkers": true
       },
-      "tableColumn": "",
+      "pluginVersion": "6.6.2",
       "targets": [
         {
-          "alias": "$col",
-          "groupBy": [
-            {
-              "params": [
-                "$__interval"
-              ],
-              "type": "time"
-            },
-            {
-              "params": [
-                "null"
-              ],
-              "type": "fill"
-            }
-          ],
-          "measurement": "snmp.SYNO",
+          "alias": "",
+          "groupBy": [],
+          "measurement": "ups",
           "orderByTime": "ASC",
           "policy": "default",
+          "query": "SELECT \"upsBatteryCharge\" FROM \"ups\" WHERE (\"agent_host\" =~ /^$diskstation$/) AND $timeFilter",
+          "rawQuery": false,
           "refId": "A",
           "resultFormat": "time_series",
           "select": [
@@ -1305,47 +1272,24 @@
                   "upsBatteryCharge"
                 ],
                 "type": "field"
-              },
-              {
-                "params": [],
-                "type": "last"
               }
             ]
           ],
-          "tags": []
+          "tags": [
+            {
+              "key": "agent_host",
+              "operator": "=~",
+              "value": "/^$diskstation$/"
+            }
+          ]
         }
       ],
-      "thresholds": "10,50",
       "title": "UPS Battery Level",
-      "type": "singlestat",
-      "valueFontSize": "80%",
-      "valueMaps": [
-        {
-          "op": "=",
-          "text": "N/A",
-          "value": "null"
-        }
-      ],
-      "valueName": "current"
+      "type": "gauge"
     },
     {
       "cacheTimeout": null,
-      "colorBackground": false,
-      "colorValue": true,
-      "colors": [
-        "#299c46",
-        "rgba(237, 129, 40, 0.89)",
-        "#d44a3a"
-      ],
-      "decimals": null,
-      "format": "percent",
-      "gauge": {
-        "maxValue": 100,
-        "minValue": 0,
-        "show": true,
-        "thresholdLabels": false,
-        "thresholdMarkers": true
-      },
+      "datasource": "${DS_SYNOLOGY}",
       "gridPos": {
         "h": 5,
         "w": 3,
@@ -1353,59 +1297,57 @@
         "y": 3
       },
       "id": 28,
-      "interval": null,
       "links": [],
-      "mappingType": 1,
-      "mappingTypes": [
-        {
-          "name": "value to text",
-          "value": 1
+      "options": {
+        "fieldOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "defaults": {
+            "mappings": [
+              {
+                "id": 0,
+                "op": "=",
+                "text": "N/A",
+                "type": 1,
+                "value": "null"
+              }
+            ],
+            "max": 100,
+            "min": 0,
+            "nullValueMode": "connected",
+            "thresholds": {
+              "mode": "absolute",
+              "steps": [
+                {
+                  "color": "green",
+                  "value": null
+                },
+                {
+                  "color": "yellow",
+                  "value": 50
+                },
+                {
+                  "color": "red",
+                  "value": 75
+                }
+              ]
+            },
+            "unit": "percent"
+          },
+          "overrides": [],
+          "values": false
         },
-        {
-          "name": "range to text",
-          "value": 2
-        }
-      ],
-      "maxDataPoints": 100,
-      "nullPointMode": "connected",
-      "nullText": null,
-      "options": {},
-      "postfix": "",
-      "postfixFontSize": "50%",
-      "prefix": "",
-      "prefixFontSize": "50%",
-      "rangeMaps": [
-        {
-          "from": "null",
-          "text": "N/A",
-          "to": "null"
-        }
-      ],
-      "sparkline": {
-        "fillColor": "rgba(31, 118, 189, 0.18)",
-        "full": true,
-        "lineColor": "rgb(31, 120, 193)",
-        "show": false
+        "orientation": "horizontal",
+        "showThresholdLabels": false,
+        "showThresholdMarkers": true
       },
-      "tableColumn": "",
+      "pluginVersion": "6.6.2",
       "targets": [
         {
           "alias": "$col",
-          "groupBy": [
-            {
-              "params": [
-                "$__interval"
-              ],
-              "type": "time"
-            },
-            {
-              "params": [
-                "null"
-              ],
-              "type": "fill"
-            }
-          ],
-          "measurement": "snmp.SYNO",
+          "groupBy": [],
+          "measurement": "ups",
           "orderByTime": "ASC",
           "policy": "default",
           "refId": "A",
@@ -1417,46 +1359,24 @@
                   "upsLoad"
                 ],
                 "type": "field"
-              },
-              {
-                "params": [],
-                "type": "last"
               }
             ]
           ],
-          "tags": []
+          "tags": [
+            {
+              "key": "agent_host",
+              "operator": "=~",
+              "value": "/^$diskstation$/"
+            }
+          ]
         }
       ],
-      "thresholds": "50,75",
       "title": "UPS Load",
-      "type": "singlestat",
-      "valueFontSize": "80%",
-      "valueMaps": [
-        {
-          "op": "=",
-          "text": "N/A",
-          "value": "null"
-        }
-      ],
-      "valueName": "current"
+      "type": "gauge"
     },
     {
       "cacheTimeout": null,
-      "colorBackground": false,
-      "colorValue": true,
-      "colors": [
-        "#d44a3a",
-        "rgba(237, 129, 40, 0.89)",
-        "#299c46"
-      ],
-      "format": "percent",
-      "gauge": {
-        "maxValue": 100,
-        "minValue": 0,
-        "show": true,
-        "thresholdLabels": false,
-        "thresholdMarkers": true
-      },
+      "datasource": "${DS_SYNOLOGY}",
       "gridPos": {
         "h": 5,
         "w": 3,
@@ -1464,59 +1384,57 @@
         "y": 3
       },
       "id": 30,
-      "interval": null,
       "links": [],
-      "mappingType": 1,
-      "mappingTypes": [
-        {
-          "name": "value to text",
-          "value": 1
+      "options": {
+        "fieldOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "defaults": {
+            "mappings": [
+              {
+                "id": 0,
+                "op": "=",
+                "text": "N/A",
+                "type": 1,
+                "value": "null"
+              }
+            ],
+            "max": 100,
+            "min": 0,
+            "nullValueMode": "connected",
+            "thresholds": {
+              "mode": "absolute",
+              "steps": [
+                {
+                  "color": "red",
+                  "value": null
+                },
+                {
+                  "color": "yellow",
+                  "value": 10
+                },
+                {
+                  "color": "green",
+                  "value": 50
+                }
+              ]
+            },
+            "unit": "percent"
+          },
+          "overrides": [],
+          "values": false
         },
-        {
-          "name": "range to text",
-          "value": 2
-        }
-      ],
-      "maxDataPoints": 100,
-      "nullPointMode": "connected",
-      "nullText": null,
-      "options": {},
-      "postfix": "",
-      "postfixFontSize": "50%",
-      "prefix": "",
-      "prefixFontSize": "50%",
-      "rangeMaps": [
-        {
-          "from": "null",
-          "text": "N/A",
-          "to": "null"
-        }
-      ],
-      "sparkline": {
-        "fillColor": "rgba(31, 118, 189, 0.18)",
-        "full": true,
-        "lineColor": "rgb(31, 120, 193)",
-        "show": false
+        "orientation": "horizontal",
+        "showThresholdLabels": false,
+        "showThresholdMarkers": true
       },
-      "tableColumn": "",
+      "pluginVersion": "6.6.2",
       "targets": [
         {
           "alias": "$col",
-          "groupBy": [
-            {
-              "params": [
-                "$__interval"
-              ],
-              "type": "time"
-            },
-            {
-              "params": [
-                "null"
-              ],
-              "type": "fill"
-            }
-          ],
-          "measurement": "snmp.SYNO",
+          "groupBy": [],
+          "measurement": "ups",
           "orderByTime": "ASC",
           "policy": "default",
           "refId": "A",
@@ -1528,47 +1446,24 @@
                   "upsBatteryCharge"
                 ],
                 "type": "field"
-              },
-              {
-                "params": [],
-                "type": "last"
               }
             ]
           ],
-          "tags": []
+          "tags": [
+            {
+              "key": "agent_host",
+              "operator": "=~",
+              "value": "/^$diskstation$/"
+            }
+          ]
         }
       ],
-      "thresholds": "10,50",
       "title": "UPS Battery Level",
-      "type": "singlestat",
-      "valueFontSize": "80%",
-      "valueMaps": [
-        {
-          "op": "=",
-          "text": "N/A",
-          "value": "null"
-        }
-      ],
-      "valueName": "current"
+      "type": "gauge"
     },
     {
       "cacheTimeout": null,
-      "colorBackground": false,
-      "colorValue": true,
-      "colors": [
-        "#d44a3a",
-        "rgba(237, 129, 40, 0.89)",
-        "#299c46"
-      ],
-      "decimals": 0,
-      "format": "dtdurations",
-      "gauge": {
-        "maxValue": 1860,
-        "minValue": 0,
-        "show": true,
-        "thresholdLabels": false,
-        "thresholdMarkers": true
-      },
+      "datasource": "${DS_SYNOLOGY}",
       "gridPos": {
         "h": 5,
         "w": 3,
@@ -1576,59 +1471,58 @@
         "y": 3
       },
       "id": 32,
-      "interval": null,
       "links": [],
-      "mappingType": 1,
-      "mappingTypes": [
-        {
-          "name": "value to text",
-          "value": 1
+      "options": {
+        "fieldOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "defaults": {
+            "decimals": 0,
+            "mappings": [
+              {
+                "id": 0,
+                "op": "=",
+                "text": "N/A",
+                "type": 1,
+                "value": "null"
+              }
+            ],
+            "max": 1500,
+            "min": 0,
+            "nullValueMode": "connected",
+            "thresholds": {
+              "mode": "absolute",
+              "steps": [
+                {
+                  "color": "red",
+                  "value": null
+                },
+                {
+                  "color": "yellow",
+                  "value": 375
+                },
+                {
+                  "color": "green",
+                  "value": 750
+                }
+              ]
+            },
+            "unit": "dtdurations"
+          },
+          "overrides": [],
+          "values": false
         },
-        {
-          "name": "range to text",
-          "value": 2
-        }
-      ],
-      "maxDataPoints": 100,
-      "nullPointMode": "connected",
-      "nullText": null,
-      "options": {},
-      "postfix": "",
-      "postfixFontSize": "50%",
-      "prefix": "",
-      "prefixFontSize": "50%",
-      "rangeMaps": [
-        {
-          "from": "null",
-          "text": "N/A",
-          "to": "null"
-        }
-      ],
-      "sparkline": {
-        "fillColor": "rgba(31, 118, 189, 0.18)",
-        "full": true,
-        "lineColor": "rgb(31, 120, 193)",
-        "show": false
+        "orientation": "horizontal",
+        "showThresholdLabels": false,
+        "showThresholdMarkers": true
       },
-      "tableColumn": "",
+      "pluginVersion": "6.6.2",
       "targets": [
         {
           "alias": "$col",
-          "groupBy": [
-            {
-              "params": [
-                "$__interval"
-              ],
-              "type": "time"
-            },
-            {
-              "params": [
-                "null"
-              ],
-              "type": "fill"
-            }
-          ],
-          "measurement": "snmp.SYNO",
+          "groupBy": [],
+          "measurement": "ups",
           "orderByTime": "ASC",
           "policy": "default",
           "refId": "A",
@@ -1640,47 +1534,24 @@
                   "upsBatteryRuntime"
                 ],
                 "type": "field"
-              },
-              {
-                "params": [],
-                "type": "last"
               }
             ]
           ],
-          "tags": []
+          "tags": [
+            {
+              "key": "agent_host",
+              "operator": "=~",
+              "value": "/^$diskstation$/"
+            }
+          ]
         }
       ],
-      "thresholds": "561,1122",
       "title": "UPS Battery Run Time",
-      "type": "singlestat",
-      "valueFontSize": "50%",
-      "valueMaps": [
-        {
-          "op": "=",
-          "text": "N/A",
-          "value": "null"
-        }
-      ],
-      "valueName": "current"
+      "type": "gauge"
     },
     {
       "cacheTimeout": null,
-      "colorBackground": false,
-      "colorValue": true,
-      "colors": [
-        "#d44a3a",
-        "rgba(237, 129, 40, 0.89)",
-        "#299c46"
-      ],
-      "decimals": 2,
-      "format": "volt",
-      "gauge": {
-        "maxValue": 13.6,
-        "minValue": 11.6,
-        "show": true,
-        "thresholdLabels": false,
-        "thresholdMarkers": true
-      },
+      "datasource": "${DS_SYNOLOGY}",
       "gridPos": {
         "h": 5,
         "w": 3,
@@ -1688,59 +1559,58 @@
         "y": 3
       },
       "id": 34,
-      "interval": null,
       "links": [],
-      "mappingType": 1,
-      "mappingTypes": [
-        {
-          "name": "value to text",
-          "value": 1
+      "options": {
+        "fieldOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "defaults": {
+            "decimals": 2,
+            "mappings": [
+              {
+                "id": 0,
+                "op": "=",
+                "text": "N/A",
+                "type": 1,
+                "value": "null"
+              }
+            ],
+            "max": 13.6,
+            "min": 11.6,
+            "nullValueMode": "connected",
+            "thresholds": {
+              "mode": "absolute",
+              "steps": [
+                {
+                  "color": "red",
+                  "value": null
+                },
+                {
+                  "color": "yellow",
+                  "value": 12
+                },
+                {
+                  "color": "green",
+                  "value": 13
+                }
+              ]
+            },
+            "unit": "volt"
+          },
+          "overrides": [],
+          "values": false
         },
-        {
-          "name": "range to text",
-          "value": 2
-        }
-      ],
-      "maxDataPoints": 100,
-      "nullPointMode": "connected",
-      "nullText": null,
-      "options": {},
-      "postfix": "",
-      "postfixFontSize": "50%",
-      "prefix": "",
-      "prefixFontSize": "50%",
-      "rangeMaps": [
-        {
-          "from": "null",
-          "text": "N/A",
-          "to": "null"
-        }
-      ],
-      "sparkline": {
-        "fillColor": "rgba(31, 118, 189, 0.18)",
-        "full": true,
-        "lineColor": "rgb(31, 120, 193)",
-        "show": false
+        "orientation": "horizontal",
+        "showThresholdLabels": false,
+        "showThresholdMarkers": true
       },
-      "tableColumn": "",
+      "pluginVersion": "6.6.2",
       "targets": [
         {
           "alias": "$col",
-          "groupBy": [
-            {
-              "params": [
-                "$__interval"
-              ],
-              "type": "time"
-            },
-            {
-              "params": [
-                "null"
-              ],
-              "type": "fill"
-            }
-          ],
-          "measurement": "snmp.SYNO",
+          "groupBy": [],
+          "measurement": "ups",
           "orderByTime": "ASC",
           "policy": "default",
           "refId": "A",
@@ -1752,47 +1622,24 @@
                   "upsBatteryVoltage"
                 ],
                 "type": "field"
-              },
-              {
-                "params": [],
-                "type": "last"
               }
             ]
           ],
-          "tags": []
+          "tags": [
+            {
+              "key": "agent_host",
+              "operator": "=~",
+              "value": "/^$diskstation$/"
+            }
+          ]
         }
       ],
-      "thresholds": "12,13",
       "title": "UPS Battery Voltage",
-      "type": "singlestat",
-      "valueFontSize": "50%",
-      "valueMaps": [
-        {
-          "op": "=",
-          "text": "N/A",
-          "value": "null"
-        }
-      ],
-      "valueName": "current"
+      "type": "gauge"
     },
     {
       "cacheTimeout": null,
-      "colorBackground": false,
-      "colorValue": true,
-      "colors": [
-        "#d44a3a",
-        "rgba(237, 129, 40, 0.89)",
-        "#299c46"
-      ],
-      "decimals": 2,
-      "format": "volt",
-      "gauge": {
-        "maxValue": 120,
-        "minValue": 105,
-        "show": true,
-        "thresholdLabels": false,
-        "thresholdMarkers": true
-      },
+      "datasource": "${DS_SYNOLOGY}",
       "gridPos": {
         "h": 5,
         "w": 3,
@@ -1800,59 +1647,58 @@
         "y": 3
       },
       "id": 36,
-      "interval": null,
       "links": [],
-      "mappingType": 1,
-      "mappingTypes": [
-        {
-          "name": "value to text",
-          "value": 1
+      "options": {
+        "fieldOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "defaults": {
+            "decimals": 2,
+            "mappings": [
+              {
+                "id": 0,
+                "op": "=",
+                "text": "N/A",
+                "type": 1,
+                "value": "null"
+              }
+            ],
+            "max": 120,
+            "min": 105,
+            "nullValueMode": "connected",
+            "thresholds": {
+              "mode": "absolute",
+              "steps": [
+                {
+                  "color": "red",
+                  "value": null
+                },
+                {
+                  "color": "yellow",
+                  "value": 110
+                },
+                {
+                  "color": "green",
+                  "value": 115
+                }
+              ]
+            },
+            "unit": "volt"
+          },
+          "overrides": [],
+          "values": false
         },
-        {
-          "name": "range to text",
-          "value": 2
-        }
-      ],
-      "maxDataPoints": 100,
-      "nullPointMode": "connected",
-      "nullText": null,
-      "options": {},
-      "postfix": "",
-      "postfixFontSize": "50%",
-      "prefix": "",
-      "prefixFontSize": "50%",
-      "rangeMaps": [
-        {
-          "from": "null",
-          "text": "N/A",
-          "to": "null"
-        }
-      ],
-      "sparkline": {
-        "fillColor": "rgba(31, 118, 189, 0.18)",
-        "full": true,
-        "lineColor": "rgb(31, 120, 193)",
-        "show": false
+        "orientation": "horizontal",
+        "showThresholdLabels": false,
+        "showThresholdMarkers": true
       },
-      "tableColumn": "",
+      "pluginVersion": "6.6.2",
       "targets": [
         {
           "alias": "$col",
-          "groupBy": [
-            {
-              "params": [
-                "$__interval"
-              ],
-              "type": "time"
-            },
-            {
-              "params": [
-                "null"
-              ],
-              "type": "fill"
-            }
-          ],
-          "measurement": "snmp.SYNO",
+          "groupBy": [],
+          "measurement": "ups",
           "orderByTime": "ASC",
           "policy": "default",
           "refId": "A",
@@ -1864,43 +1710,38 @@
                   "upsInputVoltage"
                 ],
                 "type": "field"
-              },
-              {
-                "params": [],
-                "type": "last"
               }
             ]
           ],
-          "tags": []
+          "tags": [
+            {
+              "key": "agent_host",
+              "operator": "=~",
+              "value": "/^$diskstation$/"
+            }
+          ]
         }
       ],
-      "thresholds": "110,115",
       "title": "UPS Input Voltage",
-      "type": "singlestat",
-      "valueFontSize": "50%",
-      "valueMaps": [
-        {
-          "op": "=",
-          "text": "N/A",
-          "value": "null"
-        }
-      ],
-      "valueName": "current"
+      "type": "gauge"
     },
     {
       "aliasColors": {},
       "bars": false,
       "dashLength": 10,
       "dashes": false,
-      "datasource": "influxdb",
+      "datasource": "${DS_SYNOLOGY}",
       "fill": 1,
+      "fillGradient": 0,
       "gridPos": {
-        "h": 5,
-        "w": 10,
+        "h": 8,
+        "w": 9,
         "x": 0,
         "y": 8
       },
+      "hiddenSeries": false,
       "id": 2,
+      "interval": "1m",
       "legend": {
         "alignAsTable": true,
         "avg": false,
@@ -1908,7 +1749,7 @@
         "max": true,
         "min": true,
         "rightSide": false,
-        "show": false,
+        "show": true,
         "total": false,
         "values": true
       },
@@ -1916,7 +1757,9 @@
       "linewidth": 1,
       "links": [],
       "nullPointMode": "connected",
-      "options": {},
+      "options": {
+        "dataLinks": []
+      },
       "percentage": false,
       "pointradius": 5,
       "points": false,
@@ -1927,9 +1770,6 @@
           "fill": 0,
           "linewidth": 2,
           "yaxis": 2
-        },
-        {
-          "alias": "Load-1"
         }
       ],
       "spaceLength": 10,
@@ -1971,6 +1811,8 @@
           ],
           "orderByTime": "ASC",
           "policy": "default",
+          "query": "SELECT moving_average(mean(\"laLoadInt\"), 5) FROM \"laTable\" WHERE (\"agent_host\" =~ /^$diskstation$/) AND $timeFilter GROUP BY time($__interval), \"laNames\"",
+          "rawQuery": false,
           "refId": "A",
           "resultFormat": "time_series",
           "select": [
@@ -1997,13 +1839,7 @@
             {
               "key": "agent_host",
               "operator": "=~",
-              "value": "/^$host$/"
-            },
-            {
-              "condition": "AND",
-              "key": "laNames",
-              "operator": "=",
-              "value": "Load-5"
+              "value": "/^$diskstation$/"
             }
           ],
           "target": "",
@@ -2017,12 +1853,6 @@
                 "$__interval"
               ],
               "type": "time"
-            },
-            {
-              "params": [
-                "null"
-              ],
-              "type": "fill"
             }
           ],
           "measurement": "snmp.SYNO",
@@ -2056,7 +1886,13 @@
               }
             ]
           ],
-          "tags": []
+          "tags": [
+            {
+              "key": "agent_host",
+              "operator": "=~",
+              "value": "/^$diskstation$/"
+            }
+          ]
         }
       ],
       "thresholds": [],
@@ -2079,7 +1915,7 @@
       },
       "yaxes": [
         {
-          "format": "short",
+          "format": "none",
           "label": null,
           "logBase": 1,
           "max": null,
@@ -2087,11 +1923,12 @@
           "show": true
         },
         {
+          "decimals": null,
           "format": "celsius",
           "label": null,
           "logBase": 1,
-          "max": "50",
-          "min": "25",
+          "max": null,
+          "min": null,
           "show": true
         }
       ],
@@ -2102,12 +1939,12 @@
     },
     {
       "columns": [],
-      "datasource": "influxdb",
+      "datasource": "${DS_SYNOLOGY}",
       "fontSize": "100%",
       "gridPos": {
-        "h": 5,
-        "w": 8,
-        "x": 10,
+        "h": 8,
+        "w": 9,
+        "x": 9,
         "y": 8
       },
       "id": 8,
@@ -2122,11 +1959,13 @@
       },
       "styles": [
         {
+          "align": "auto",
           "dateFormat": "YYYY-MM-DD HH:mm:ss",
           "pattern": "Time",
           "type": "hidden"
         },
         {
+          "align": "auto",
           "colorMode": null,
           "colors": [
             "rgba(245, 54, 54, 0.9)",
@@ -2140,6 +1979,7 @@
           "unit": "short"
         },
         {
+          "align": "auto",
           "colorMode": "cell",
           "colors": [
             "rgba(50, 172, 45, 0.97)",
@@ -2148,15 +1988,39 @@
           ],
           "dateFormat": "YYYY-MM-DD HH:mm:ss",
           "decimals": 0,
+          "mappingType": 1,
           "pattern": "Status",
           "thresholds": [
             "4",
             "5"
           ],
-          "type": "number",
-          "unit": "short"
+          "type": "string",
+          "unit": "short",
+          "valueMaps": [
+            {
+              "text": "Normal",
+              "value": "1"
+            },
+            {
+              "text": "Initialized",
+              "value": "2"
+            },
+            {
+              "text": "Not Initialized",
+              "value": "3"
+            },
+            {
+              "text": "System Partition Failed",
+              "value": "4"
+            },
+            {
+              "text": "Crashed",
+              "value": "5"
+            }
+          ]
         },
         {
+          "align": "auto",
           "colorMode": "cell",
           "colors": [
             "rgba(50, 172, 45, 0.97)",
@@ -2203,6 +2067,8 @@
           ],
           "orderByTime": "ASC",
           "policy": "default",
+          "query": "SELECT last(\"diskModel\") AS \"Model\", last(\"diskStatus\") AS \"Status\", last(\"diskType\") AS \"Disk Type\", last(\"diskTemperature\") AS \"CurrentC\", max(\"diskTemperature\") AS \"MaxC\", min(\"diskTemperature\") AS \"MinC\", \"synology\".\"autogen\".\"diskSMARTTable\".\"diskSMARTAttrRaw\" AS \"MinC\" FROM \"diskTable\" WHERE (\"agent_host\" =~ /^$diskstation$/) AND $timeFilter GROUP BY \"diskID\", \"devicePath\"",
+          "rawQuery": false,
           "refId": "A",
           "resultFormat": "table",
           "select": [
@@ -2319,7 +2185,7 @@
             {
               "key": "agent_host",
               "operator": "=~",
-              "value": "/^$host$/"
+              "value": "/^$diskstation$/"
             }
           ],
           "timeField": "@timestamp"
@@ -2334,22 +2200,26 @@
       "bars": false,
       "dashLength": 10,
       "dashes": false,
+      "datasource": "${DS_SYNOLOGY}",
       "fill": 1,
+      "fillGradient": 0,
       "gridPos": {
-        "h": 5,
+        "h": 8,
         "w": 6,
         "x": 18,
         "y": 8
       },
+      "hiddenSeries": false,
       "id": 20,
+      "interval": "1m",
       "legend": {
-        "alignAsTable": true,
+        "alignAsTable": false,
         "avg": false,
         "current": true,
         "max": false,
         "min": false,
         "rightSide": false,
-        "show": false,
+        "show": true,
         "total": false,
         "values": true
       },
@@ -2357,15 +2227,18 @@
       "linewidth": 2,
       "links": [],
       "nullPointMode": "null",
-      "options": {},
+      "options": {
+        "dataLinks": []
+      },
       "percentage": false,
       "pointradius": 5,
       "points": false,
       "renderer": "flot",
       "seriesOverrides": [
         {
-          "alias": "raidTable.SizeUsed",
-          "color": "#c15c17"
+          "alias": "/SizeTotal/",
+          "fill": 0,
+          "fillGradient": 0
         }
       ],
       "spaceLength": 10,
@@ -2373,7 +2246,7 @@
       "steppedLine": false,
       "targets": [
         {
-          "alias": "",
+          "alias": "$tag_raidName - $col",
           "groupBy": [
             {
               "params": [
@@ -2383,16 +2256,16 @@
             },
             {
               "params": [
-                "previous"
+                "raidName"
               ],
-              "type": "fill"
+              "type": "tag"
             }
           ],
           "measurement": "raidTable",
           "orderByTime": "ASC",
           "policy": "default",
-          "query": "SELECT -1*(last(\"raidFreeSize\") -11500000000000) AS \"SizeUsed\" FROM \"raidTable\" WHERE $timeFilter GROUP BY time($__interval) fill(previous)",
-          "rawQuery": true,
+          "query": "SELECT mean(\"raidTotalSize\") AS \"SizeTotal\", mean(\"raidFreeSize\") AS \"SizeFree\", \"raidTotalSize\" - mean(raidFreeSize) AS \"SizeFree\" FROM \"raidTable\" WHERE (\"agent_host\" =~ /^$diskstation$/) AND $timeFilter GROUP BY time($__interval), \"raidName\"",
+          "rawQuery": false,
           "refId": "A",
           "resultFormat": "time_series",
           "select": [
@@ -2405,7 +2278,7 @@
               },
               {
                 "params": [],
-                "type": "last"
+                "type": "mean"
               },
               {
                 "params": [
@@ -2423,7 +2296,7 @@
               },
               {
                 "params": [],
-                "type": "last"
+                "type": "mean"
               },
               {
                 "params": [
@@ -2435,29 +2308,41 @@
             [
               {
                 "params": [
-                  "raidFreeSize"
+                  "raidTotalSize"
                 ],
                 "type": "field"
               },
               {
                 "params": [],
-                "type": "last"
+                "type": "mean"
               },
               {
                 "params": [
-                  "-11500000000000"
+                  "- mean(raidFreeSize)"
                 ],
                 "type": "math"
               },
               {
                 "params": [
-                  "SizeUsed"
+                  "SizeFree"
                 ],
                 "type": "alias"
               }
             ]
           ],
-          "tags": []
+          "tags": [
+            {
+              "key": "agent_host",
+              "operator": "=~",
+              "value": "/^$diskstation$/"
+            },
+            {
+              "condition": "AND",
+              "key": "raidName",
+              "operator": "=~",
+              "value": "/^$volume$/"
+            }
+          ]
         }
       ],
       "thresholds": [],
@@ -2483,8 +2368,8 @@
           "format": "decbytes",
           "label": null,
           "logBase": 1,
-          "max": "10000000000000",
-          "min": "0",
+          "max": null,
+          "min": null,
           "show": true
         },
         {
@@ -2506,14 +2391,18 @@
       "bars": false,
       "dashLength": 10,
       "dashes": false,
+      "datasource": "${DS_SYNOLOGY}",
       "fill": 1,
+      "fillGradient": 0,
       "gridPos": {
         "h": 10,
-        "w": 24,
+        "w": 12,
         "x": 0,
-        "y": 13
+        "y": 16
       },
+      "hiddenSeries": false,
       "id": 40,
+      "interval": "1m",
       "legend": {
         "alignAsTable": true,
         "avg": false,
@@ -2529,7 +2418,9 @@
       "linewidth": 2,
       "links": [],
       "nullPointMode": "null",
-      "options": {},
+      "options": {
+        "dataLinks": []
+      },
       "percentage": false,
       "pointradius": 5,
       "points": false,
@@ -2553,22 +2444,16 @@
       "steppedLine": false,
       "targets": [
         {
-          "alias": "UPS Load",
+          "alias": "$col",
           "groupBy": [
             {
               "params": [
                 "$__interval"
               ],
               "type": "time"
-            },
-            {
-              "params": [
-                "previous"
-              ],
-              "type": "fill"
             }
           ],
-          "measurement": "snmp.SYNO",
+          "measurement": "ups",
           "orderByTime": "ASC",
           "policy": "default",
           "refId": "A",
@@ -2584,33 +2469,14 @@
               {
                 "params": [],
                 "type": "mean"
+              },
+              {
+                "params": [
+                  "UPS Load"
+                ],
+                "type": "alias"
               }
-            ]
-          ],
-          "tags": []
-        },
-        {
-          "alias": "UPS Charge Level",
-          "groupBy": [
-            {
-              "params": [
-                "$__interval"
-              ],
-              "type": "time"
-            },
-            {
-              "params": [
-                "previous"
-              ],
-              "type": "fill"
-            }
-          ],
-          "measurement": "snmp.SYNO",
-          "orderByTime": "ASC",
-          "policy": "default",
-          "refId": "B",
-          "resultFormat": "time_series",
-          "select": [
+            ],
             [
               {
                 "params": [
@@ -2620,34 +2486,15 @@
               },
               {
                 "params": [],
-                "type": "last"
+                "type": "mean"
+              },
+              {
+                "params": [
+                  "UPS Charge Level"
+                ],
+                "type": "alias"
               }
-            ]
-          ],
-          "tags": []
-        },
-        {
-          "alias": "UPS Input Voltage",
-          "groupBy": [
-            {
-              "params": [
-                "$__interval"
-              ],
-              "type": "time"
-            },
-            {
-              "params": [
-                "previous"
-              ],
-              "type": "fill"
-            }
-          ],
-          "measurement": "snmp.SYNO",
-          "orderByTime": "ASC",
-          "policy": "default",
-          "refId": "C",
-          "resultFormat": "time_series",
-          "select": [
+            ],
             [
               {
                 "params": [
@@ -2658,33 +2505,14 @@
               {
                 "params": [],
                 "type": "mean"
+              },
+              {
+                "params": [
+                  "UPS Input Voltage"
+                ],
+                "type": "alias"
               }
-            ]
-          ],
-          "tags": []
-        },
-        {
-          "alias": "UPS Battery Voltage",
-          "groupBy": [
-            {
-              "params": [
-                "$__interval"
-              ],
-              "type": "time"
-            },
-            {
-              "params": [
-                "previous"
-              ],
-              "type": "fill"
-            }
-          ],
-          "measurement": "snmp.SYNO",
-          "orderByTime": "ASC",
-          "policy": "default",
-          "refId": "D",
-          "resultFormat": "time_series",
-          "select": [
+            ],
             [
               {
                 "params": [
@@ -2695,10 +2523,23 @@
               {
                 "params": [],
                 "type": "mean"
+              },
+              {
+                "params": [
+                  "UPS Battery Voltage"
+                ],
+                "type": "alias"
               }
             ]
           ],
-          "tags": []
+          "tags": [
+            {
+              "key": "agent_host",
+              "operator": "=~",
+              "value": "/^$diskstation$/"
+            }
+          ],
+          "tz": ""
         }
       ],
       "thresholds": [],
@@ -2748,55 +2589,42 @@
       "bars": false,
       "dashLength": 10,
       "dashes": false,
-      "fill": 0,
+      "datasource": "${DS_SYNOLOGY}",
+      "fill": 1,
+      "fillGradient": 0,
       "gridPos": {
-        "h": 8,
-        "w": 24,
-        "x": 0,
-        "y": 23
+        "h": 10,
+        "w": 12,
+        "x": 12,
+        "y": 16
       },
-      "id": 18,
+      "hiddenSeries": false,
+      "id": 42,
+      "interval": "1m",
       "legend": {
-        "avg": false,
-        "current": false,
-        "max": false,
-        "min": false,
+        "alignAsTable": true,
+        "avg": true,
+        "current": true,
+        "max": true,
+        "min": true,
         "show": true,
         "total": false,
-        "values": false
+        "values": true
       },
       "lines": true,
       "linewidth": 1,
-      "links": [],
       "nullPointMode": "null",
-      "options": {},
+      "options": {
+        "dataLinks": []
+      },
       "percentage": false,
-      "pointradius": 5,
+      "pointradius": 2,
       "points": false,
       "renderer": "flot",
       "seriesOverrides": [
         {
-          "alias": "System Temperature",
-          "color": "#e5ac0e",
-          "fill": 0,
-          "linewidth": 2,
-          "yaxis": 2
-        },
-        {
-          "alias": "Disk 1",
-          "color": "#5195ce"
-        },
-        {
-          "alias": "Disk 2",
-          "color": "#1f78c1"
-        },
-        {
-          "alias": "Disk 3",
-          "color": "#0a437c"
-        },
-        {
-          "alias": "Disk 4",
-          "color": "#badff4"
+          "alias": "/Write/",
+          "transform": "negative-Y"
         }
       ],
       "spaceLength": 10,
@@ -2804,7 +2632,7 @@
       "steppedLine": false,
       "targets": [
         {
-          "alias": "Disk 1",
+          "alias": "$tag_storageIODevice - $col",
           "groupBy": [
             {
               "params": [
@@ -2814,11 +2642,197 @@
             },
             {
               "params": [
-                "null"
+                "storageIODevice"
               ],
-              "type": "fill"
+              "type": "tag"
             }
           ],
+          "measurement": "storageIOTable",
+          "orderByTime": "ASC",
+          "policy": "default",
+          "refId": "A",
+          "resultFormat": "time_series",
+          "select": [
+            [
+              {
+                "params": [
+                  "storageIOWrites"
+                ],
+                "type": "field"
+              },
+              {
+                "params": [],
+                "type": "mean"
+              },
+              {
+                "params": [
+                  "1s"
+                ],
+                "type": "non_negative_derivative"
+              },
+              {
+                "params": [
+                  "5"
+                ],
+                "type": "moving_average"
+              },
+              {
+                "params": [
+                  "Write"
+                ],
+                "type": "alias"
+              }
+            ],
+            [
+              {
+                "params": [
+                  "storageIOReads"
+                ],
+                "type": "field"
+              },
+              {
+                "params": [],
+                "type": "mean"
+              },
+              {
+                "params": [
+                  "1s"
+                ],
+                "type": "non_negative_derivative"
+              },
+              {
+                "params": [
+                  "5"
+                ],
+                "type": "moving_average"
+              },
+              {
+                "params": [
+                  "Read"
+                ],
+                "type": "alias"
+              }
+            ]
+          ],
+          "tags": [
+            {
+              "key": "agent_host",
+              "operator": "=~",
+              "value": "/^$diskstation$/"
+            }
+          ]
+        }
+      ],
+      "thresholds": [],
+      "timeFrom": null,
+      "timeRegions": [],
+      "timeShift": null,
+      "title": "Disk IO",
+      "tooltip": {
+        "shared": true,
+        "sort": 0,
+        "value_type": "individual"
+      },
+      "type": "graph",
+      "xaxis": {
+        "buckets": null,
+        "mode": "time",
+        "name": null,
+        "show": true,
+        "values": []
+      },
+      "yaxes": [
+        {
+          "decimals": 1,
+          "format": "iops",
+          "label": "",
+          "logBase": 1,
+          "max": null,
+          "min": null,
+          "show": true
+        },
+        {
+          "format": "short",
+          "label": null,
+          "logBase": 1,
+          "max": null,
+          "min": null,
+          "show": true
+        }
+      ],
+      "yaxis": {
+        "align": false,
+        "alignLevel": null
+      }
+    },
+    {
+      "aliasColors": {},
+      "bars": false,
+      "dashLength": 10,
+      "dashes": false,
+      "datasource": "${DS_SYNOLOGY}",
+      "fill": 0,
+      "fillGradient": 0,
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 0,
+        "y": 26
+      },
+      "hiddenSeries": false,
+      "id": 18,
+      "interval": "1m",
+      "legend": {
+        "alignAsTable": true,
+        "avg": true,
+        "current": true,
+        "max": true,
+        "min": true,
+        "rightSide": false,
+        "show": true,
+        "total": false,
+        "values": true
+      },
+      "lines": true,
+      "linewidth": 1,
+      "links": [],
+      "nullPointMode": "null",
+      "options": {
+        "dataLinks": []
+      },
+      "percentage": false,
+      "pointradius": 5,
+      "points": false,
+      "renderer": "flot",
+      "seriesOverrides": [
+        {
+          "alias": "System",
+          "fill": 0,
+          "linewidth": 2,
+          "yaxis": 2
+        }
+      ],
+      "spaceLength": 10,
+      "stack": false,
+      "steppedLine": false,
+      "targets": [
+        {
+          "alias": "$tag_diskID",
+          "groupBy": [
+            {
+              "params": [
+                "$__interval"
+              ],
+              "type": "time"
+            },
+            {
+              "params": [
+                "diskID"
+              ],
+              "type": "tag"
+            }
+          ],
+          "hide": false,
           "measurement": "diskTable",
           "orderByTime": "ASC",
           "policy": "default",
@@ -2846,175 +2860,23 @@
           ],
           "tags": [
             {
-              "key": "diskID",
-              "operator": "=",
-              "value": "Disk 1"
+              "key": "agent_host",
+              "operator": "=~",
+              "value": "/^$diskstation$/"
             }
           ]
         },
         {
-          "alias": "Disk 2",
+          "alias": "System",
           "groupBy": [
             {
               "params": [
                 "$__interval"
               ],
               "type": "time"
-            },
-            {
-              "params": [
-                "null"
-              ],
-              "type": "fill"
             }
           ],
-          "measurement": "diskTable",
-          "orderByTime": "ASC",
-          "policy": "default",
-          "refId": "B",
-          "resultFormat": "time_series",
-          "select": [
-            [
-              {
-                "params": [
-                  "diskTemperature"
-                ],
-                "type": "field"
-              },
-              {
-                "params": [],
-                "type": "mean"
-              },
-              {
-                "params": [
-                  10
-                ],
-                "type": "moving_average"
-              }
-            ]
-          ],
-          "tags": [
-            {
-              "key": "diskID",
-              "operator": "=",
-              "value": "Disk 2"
-            }
-          ]
-        },
-        {
-          "alias": "Disk 3",
-          "groupBy": [
-            {
-              "params": [
-                "$__interval"
-              ],
-              "type": "time"
-            },
-            {
-              "params": [
-                "null"
-              ],
-              "type": "fill"
-            }
-          ],
-          "measurement": "diskTable",
-          "orderByTime": "ASC",
-          "policy": "default",
-          "refId": "C",
-          "resultFormat": "time_series",
-          "select": [
-            [
-              {
-                "params": [
-                  "diskTemperature"
-                ],
-                "type": "field"
-              },
-              {
-                "params": [],
-                "type": "mean"
-              },
-              {
-                "params": [
-                  10
-                ],
-                "type": "moving_average"
-              }
-            ]
-          ],
-          "tags": [
-            {
-              "key": "diskID",
-              "operator": "=",
-              "value": "Disk 3"
-            }
-          ]
-        },
-        {
-          "alias": "Disk 4",
-          "groupBy": [
-            {
-              "params": [
-                "$__interval"
-              ],
-              "type": "time"
-            },
-            {
-              "params": [
-                "null"
-              ],
-              "type": "fill"
-            }
-          ],
-          "measurement": "diskTable",
-          "orderByTime": "ASC",
-          "policy": "default",
-          "refId": "D",
-          "resultFormat": "time_series",
-          "select": [
-            [
-              {
-                "params": [
-                  "diskTemperature"
-                ],
-                "type": "field"
-              },
-              {
-                "params": [],
-                "type": "mean"
-              },
-              {
-                "params": [
-                  10
-                ],
-                "type": "moving_average"
-              }
-            ]
-          ],
-          "tags": [
-            {
-              "key": "diskID",
-              "operator": "=",
-              "value": "Disk 4"
-            }
-          ]
-        },
-        {
-          "alias": "System Temperature",
-          "groupBy": [
-            {
-              "params": [
-                "$__interval"
-              ],
-              "type": "time"
-            },
-            {
-              "params": [
-                "null"
-              ],
-              "type": "fill"
-            }
-          ],
+          "hide": false,
           "measurement": "snmp.SYNO",
           "orderByTime": "ASC",
           "policy": "default",
@@ -3034,7 +2896,7 @@
               },
               {
                 "params": [
-                  10
+                  "5"
                 ],
                 "type": "moving_average"
               }
@@ -3043,8 +2905,8 @@
           "tags": [
             {
               "key": "agent_host",
-              "operator": "=",
-              "value": "192.168.1.5"
+              "operator": "=~",
+              "value": "/^$diskstation$/"
             }
           ]
         }
@@ -3071,13 +2933,14 @@
         {
           "decimals": null,
           "format": "celsius",
-          "label": null,
+          "label": "",
           "logBase": 1,
           "max": "100",
           "min": "25",
           "show": true
         },
         {
+          "decimals": null,
           "format": "celsius",
           "label": null,
           "logBase": 1,
@@ -3092,27 +2955,265 @@
       }
     },
     {
+      "columns": [],
+      "datasource": "${DS_SYNOLOGY}",
+      "fontSize": "100%",
+      "gridPos": {
+        "h": 18,
+        "w": 12,
+        "x": 12,
+        "y": 26
+      },
+      "id": 43,
+      "links": [],
+      "options": {},
+      "pageSize": null,
+      "scroll": false,
+      "showHeader": true,
+      "sort": {
+        "col": 1,
+        "desc": false
+      },
+      "styles": [
+        {
+          "align": "auto",
+          "dateFormat": "YYYY-MM-DD HH:mm:ss",
+          "pattern": "Time",
+          "type": "hidden"
+        },
+        {
+          "alias": "ID",
+          "align": "auto",
+          "colorMode": null,
+          "colors": [
+            "rgba(245, 54, 54, 0.9)",
+            "rgba(237, 129, 40, 0.89)",
+            "rgba(50, 172, 45, 0.97)"
+          ],
+          "decimals": 2,
+          "pattern": "diskSMARTAttrId",
+          "thresholds": [],
+          "type": "string",
+          "unit": "short"
+        },
+        {
+          "alias": "Disk",
+          "align": "auto",
+          "colorMode": "cell",
+          "colors": [
+            "rgba(50, 172, 45, 0.97)",
+            "rgba(237, 129, 40, 0.89)",
+            "rgba(245, 54, 54, 0.9)"
+          ],
+          "dateFormat": "YYYY-MM-DD HH:mm:ss",
+          "decimals": 0,
+          "mappingType": 1,
+          "pattern": "diskSMARTInfoDevName",
+          "thresholds": [
+            "4",
+            "5"
+          ],
+          "type": "string",
+          "unit": "short",
+          "valueMaps": [
+            {
+              "text": "Normal",
+              "value": "1"
+            },
+            {
+              "text": "Initialized",
+              "value": "2"
+            },
+            {
+              "text": "Not Initialized",
+              "value": "3"
+            },
+            {
+              "text": "System Partition Failed",
+              "value": "4"
+            },
+            {
+              "text": "Crashed",
+              "value": "5"
+            }
+          ]
+        }
+      ],
+      "targets": [
+        {
+          "groupBy": [
+            {
+              "params": [
+                "diskSMARTInfoDevName"
+              ],
+              "type": "tag"
+            },
+            {
+              "params": [
+                "diskSMARTAttrId"
+              ],
+              "type": "tag"
+            }
+          ],
+          "measurement": "diskSMARTTable",
+          "orderByTime": "ASC",
+          "policy": "default",
+          "refId": "B",
+          "resultFormat": "table",
+          "select": [
+            [
+              {
+                "params": [
+                  "diskSMARTAttrCurrent"
+                ],
+                "type": "field"
+              },
+              {
+                "params": [],
+                "type": "last"
+              },
+              {
+                "params": [
+                  "Value"
+                ],
+                "type": "alias"
+              }
+            ],
+            [
+              {
+                "params": [
+                  "diskSMARTAttrName"
+                ],
+                "type": "field"
+              },
+              {
+                "params": [],
+                "type": "last"
+              },
+              {
+                "params": [
+                  "Attribute"
+                ],
+                "type": "alias"
+              }
+            ],
+            [
+              {
+                "params": [
+                  "diskSMARTAttrRaw"
+                ],
+                "type": "field"
+              },
+              {
+                "params": [],
+                "type": "last"
+              },
+              {
+                "params": [
+                  "Raw Data"
+                ],
+                "type": "alias"
+              }
+            ],
+            [
+              {
+                "params": [
+                  "diskSMARTAttrStatus"
+                ],
+                "type": "field"
+              },
+              {
+                "params": [],
+                "type": "last"
+              },
+              {
+                "params": [
+                  "Status"
+                ],
+                "type": "alias"
+              }
+            ],
+            [
+              {
+                "params": [
+                  "diskSMARTAttrThreshold"
+                ],
+                "type": "field"
+              },
+              {
+                "params": [],
+                "type": "last"
+              },
+              {
+                "params": [
+                  "Threshold"
+                ],
+                "type": "alias"
+              }
+            ],
+            [
+              {
+                "params": [
+                  "diskSMARTAttrWorst"
+                ],
+                "type": "field"
+              },
+              {
+                "params": [],
+                "type": "last"
+              },
+              {
+                "params": [
+                  "Worst"
+                ],
+                "type": "alias"
+              }
+            ]
+          ],
+          "tags": [
+            {
+              "key": "agent_host",
+              "operator": "=~",
+              "value": "/^$diskstation$/"
+            },
+            {
+              "condition": "AND",
+              "key": "diskSMARTInfoDevName",
+              "operator": "=~",
+              "value": "/^$diskPath$/"
+            }
+          ]
+        }
+      ],
+      "title": "SMART Info",
+      "transform": "table",
+      "type": "table"
+    },
+    {
       "aliasColors": {},
       "bars": false,
       "dashLength": 10,
       "dashes": false,
-      "datasource": "influxdb",
+      "datasource": "${DS_SYNOLOGY}",
       "fill": 1,
+      "fillGradient": 0,
       "gridPos": {
-        "h": 8,
+        "h": 10,
         "w": 12,
         "x": 0,
-        "y": 31
+        "y": 34
       },
+      "hiddenSeries": false,
       "id": 24,
+      "interval": "1m",
       "legend": {
         "alignAsTable": true,
-        "avg": false,
+        "avg": true,
         "current": true,
         "max": true,
         "min": true,
         "rightSide": false,
-        "show": false,
+        "show": true,
         "total": false,
         "values": true
       },
@@ -3120,35 +3221,40 @@
       "linewidth": 2,
       "links": [],
       "nullPointMode": "null",
-      "options": {},
+      "options": {
+        "dataLinks": []
+      },
       "percentage": false,
       "pointradius": 5,
       "points": false,
       "renderer": "flot",
       "seriesOverrides": [
         {
-          "alias": "ifTable.Max",
-          "fill": 0
-        },
-        {
-          "alias": "ifTable.Up",
-          "yaxis": 1
+          "alias": "/Up/",
+          "transform": "negative-Y"
         }
       ],
       "spaceLength": 10,
-      "stack": true,
+      "stack": false,
       "steppedLine": false,
       "targets": [
         {
-          "alias": "",
+          "alias": "$tag_ifDescr - $col",
           "groupBy": [
             {
               "params": [
                 "$__interval"
               ],
               "type": "time"
+            },
+            {
+              "params": [
+                "ifDescr"
+              ],
+              "type": "tag"
             }
           ],
+          "hide": false,
           "measurement": "ifTable",
           "orderByTime": "ASC",
           "policy": "default",
@@ -3233,72 +3339,20 @@
           "tags": [
             {
               "key": "agent_host",
-              "operator": "=",
-              "value": "192.168.1.5"
-            },
-            {
-              "condition": "AND",
-              "key": "ifIndex",
-              "operator": "=",
-              "value": "3"
-            }
-          ]
-        },
-        {
-          "alias": "",
-          "groupBy": [
-            {
-              "params": [
-                "$__interval"
-              ],
-              "type": "time"
-            },
-            {
-              "params": [
-                "previous"
-              ],
-              "type": "fill"
-            }
-          ],
-          "hide": true,
-          "measurement": "ifTable",
-          "orderByTime": "ASC",
-          "policy": "default",
-          "query": "SELECT mean(\"value\") FROM \"ifTable\" WHERE (\"agent_host\" = '192.168.1.5') AND $timeFilter GROUP BY time($__interval) fill(null)",
-          "rawQuery": false,
-          "refId": "A",
-          "resultFormat": "time_series",
-          "select": [
-            [
-              {
-                "params": [
-                  "ifSpeed"
-                ],
-                "type": "field"
-              },
-              {
-                "params": [],
-                "type": "last"
-              },
-              {
-                "params": [
-                  "Max"
-                ],
-                "type": "alias"
-              }
-            ]
-          ],
-          "tags": [
-            {
-              "key": "agent_host",
-              "operator": "=",
-              "value": "192.168.1.5"
+              "operator": "=~",
+              "value": "/^$diskstation$/"
             },
             {
               "condition": "AND",
               "key": "ifDescr",
-              "operator": "=",
-              "value": "eth0"
+              "operator": "!=",
+              "value": "docker0"
+            },
+            {
+              "condition": "AND",
+              "key": "ifDescr",
+              "operator": "!=",
+              "value": "sit0"
             }
           ]
         }
@@ -3323,11 +3377,11 @@
       },
       "yaxes": [
         {
-          "decimals": 1,
+          "decimals": null,
           "format": "bps",
-          "label": "Traffic",
-          "logBase": 10,
-          "max": "1100000000",
+          "label": "",
+          "logBase": 1,
+          "max": null,
           "min": null,
           "show": true
         },
@@ -3335,263 +3389,9 @@
           "format": "bps",
           "label": null,
           "logBase": 10,
-          "max": "1100000000",
+          "max": null,
           "min": null,
-          "show": true
-        }
-      ],
-      "yaxis": {
-        "align": false,
-        "alignLevel": null
-      }
-    },
-    {
-      "aliasColors": {},
-      "bars": false,
-      "dashLength": 10,
-      "dashes": false,
-      "datasource": "influxdb",
-      "fill": 1,
-      "gridPos": {
-        "h": 8,
-        "w": 12,
-        "x": 12,
-        "y": 31
-      },
-      "id": 1,
-      "legend": {
-        "alignAsTable": true,
-        "avg": false,
-        "current": true,
-        "max": true,
-        "min": true,
-        "rightSide": false,
-        "show": false,
-        "total": false,
-        "values": true
-      },
-      "lines": true,
-      "linewidth": 2,
-      "links": [],
-      "nullPointMode": "null",
-      "options": {},
-      "percentage": false,
-      "pointradius": 5,
-      "points": false,
-      "renderer": "flot",
-      "seriesOverrides": [
-        {
-          "alias": "ifTable.Max",
-          "fill": 0
-        },
-        {
-          "alias": "ifTable.Up",
-          "yaxis": 1
-        }
-      ],
-      "spaceLength": 10,
-      "stack": true,
-      "steppedLine": false,
-      "targets": [
-        {
-          "alias": "",
-          "groupBy": [
-            {
-              "params": [
-                "$__interval"
-              ],
-              "type": "time"
-            }
-          ],
-          "measurement": "ifTable",
-          "orderByTime": "ASC",
-          "policy": "default",
-          "query": "SELECT mean(\"value\") FROM \"ifTable\" WHERE (\"agent_host\" = '192.168.1.5') AND $timeFilter GROUP BY time($__interval) fill(null)",
-          "rawQuery": false,
-          "refId": "C",
-          "resultFormat": "time_series",
-          "select": [
-            [
-              {
-                "params": [
-                  "in"
-                ],
-                "type": "field"
-              },
-              {
-                "params": [],
-                "type": "mean"
-              },
-              {
-                "params": [
-                  "1s"
-                ],
-                "type": "non_negative_derivative"
-              },
-              {
-                "params": [
-                  "5"
-                ],
-                "type": "moving_average"
-              },
-              {
-                "params": [
-                  "*8"
-                ],
-                "type": "math"
-              },
-              {
-                "params": [
-                  "Down"
-                ],
-                "type": "alias"
-              }
-            ],
-            [
-              {
-                "params": [
-                  "out"
-                ],
-                "type": "field"
-              },
-              {
-                "params": [],
-                "type": "mean"
-              },
-              {
-                "params": [
-                  "1s"
-                ],
-                "type": "non_negative_derivative"
-              },
-              {
-                "params": [
-                  "5"
-                ],
-                "type": "moving_average"
-              },
-              {
-                "params": [
-                  "*8"
-                ],
-                "type": "math"
-              },
-              {
-                "params": [
-                  "Up"
-                ],
-                "type": "alias"
-              }
-            ]
-          ],
-          "tags": [
-            {
-              "key": "agent_host",
-              "operator": "=",
-              "value": "192.168.1.5"
-            },
-            {
-              "condition": "AND",
-              "key": "ifIndex",
-              "operator": "=",
-              "value": "4"
-            }
-          ]
-        },
-        {
-          "alias": "",
-          "groupBy": [
-            {
-              "params": [
-                "$__interval"
-              ],
-              "type": "time"
-            },
-            {
-              "params": [
-                "previous"
-              ],
-              "type": "fill"
-            }
-          ],
-          "hide": true,
-          "measurement": "ifTable",
-          "orderByTime": "ASC",
-          "policy": "default",
-          "query": "SELECT mean(\"value\") FROM \"ifTable\" WHERE (\"agent_host\" = '192.168.1.5') AND $timeFilter GROUP BY time($__interval) fill(null)",
-          "rawQuery": false,
-          "refId": "A",
-          "resultFormat": "time_series",
-          "select": [
-            [
-              {
-                "params": [
-                  "ifSpeed"
-                ],
-                "type": "field"
-              },
-              {
-                "params": [],
-                "type": "last"
-              },
-              {
-                "params": [
-                  "Max"
-                ],
-                "type": "alias"
-              }
-            ]
-          ],
-          "tags": [
-            {
-              "key": "agent_host",
-              "operator": "=",
-              "value": "192.168.1.5"
-            },
-            {
-              "condition": "AND",
-              "key": "ifDescr",
-              "operator": "=",
-              "value": "eth0"
-            }
-          ]
-        }
-      ],
-      "thresholds": [],
-      "timeFrom": null,
-      "timeRegions": [],
-      "timeShift": null,
-      "title": "ESXi Traffic",
-      "tooltip": {
-        "shared": true,
-        "sort": 0,
-        "value_type": "individual"
-      },
-      "type": "graph",
-      "xaxis": {
-        "buckets": null,
-        "mode": "time",
-        "name": null,
-        "show": true,
-        "values": []
-      },
-      "yaxes": [
-        {
-          "decimals": 1,
-          "format": "bps",
-          "label": "Traffic",
-          "logBase": 10,
-          "max": "1100000000",
-          "min": null,
-          "show": true
-        },
-        {
-          "format": "bps",
-          "label": null,
-          "logBase": 10,
-          "max": "1100000000",
-          "min": null,
-          "show": true
+          "show": false
         }
       ],
       "yaxis": {
@@ -3601,43 +3401,23 @@
     }
   ],
   "refresh": "1m",
-  "schemaVersion": 18,
+  "schemaVersion": 22,
   "style": "dark",
   "tags": [],
   "templating": {
     "list": [
       {
-        "current": {
-          "text": "influxdb",
-          "value": "influxdb"
-        },
+        "allValue": null,
+        "current": {},
+        "datasource": "${DS_SYNOLOGY}",
+        "definition": "show tag values from \"snmp.SYNO\" with key=\"agent_host\"",
         "hide": 0,
         "includeAll": false,
-        "label": null,
-        "multi": false,
-        "name": "influxdb",
-        "options": [],
-        "query": "influxdb",
-        "refresh": 1,
-        "regex": "",
-        "skipUrlSync": false,
-        "type": "datasource"
-      },
-      {
-        "allValue": null,
-        "current": {
-          "text": "All",
-          "value": "$__all"
-        },
-        "datasource": "influxdb",
-        "definition": "",
-        "hide": 0,
-        "includeAll": true,
-        "label": "Syno:",
+        "label": "Disk Station",
         "multi": true,
-        "name": "host",
+        "name": "diskstation",
         "options": [],
-        "query": "SHOW TAG VALUES FROM \"snmp.SYNO\" WITH KEY = \"agent_host\"",
+        "query": "show tag values from \"snmp.SYNO\" with key=\"agent_host\"",
         "refresh": 1,
         "regex": "",
         "skipUrlSync": false,
@@ -3650,21 +3430,38 @@
       },
       {
         "allValue": null,
-        "current": {
-          "text": "eth1",
-          "value": [
-            "eth1"
-          ]
-        },
-        "datasource": "influxdb",
-        "definition": "",
+        "current": {},
+        "datasource": "${DS_SYNOLOGY}",
+        "definition": "show tag values from \"raidTable\" with key=\"raidName\" where \"agent_host\" =~ /$diskstation/",
         "hide": 0,
-        "includeAll": true,
-        "label": "Interface:",
+        "includeAll": false,
+        "label": "Volume",
         "multi": true,
-        "name": "intf",
+        "name": "volume",
         "options": [],
-        "query": "SHOW TAG VALUES FROM \"ifTable\" WITH KEY = \"ifDescr\" WHERE \"agent_host\" =~ /^$host/",
+        "query": "show tag values from \"raidTable\" with key=\"raidName\" where \"agent_host\" =~ /$diskstation/",
+        "refresh": 1,
+        "regex": "",
+        "skipUrlSync": false,
+        "sort": 0,
+        "tagValuesQuery": "",
+        "tags": [],
+        "tagsQuery": "",
+        "type": "query",
+        "useTags": false
+      },
+      {
+        "allValue": null,
+        "current": {},
+        "datasource": "${DS_SYNOLOGY}",
+        "definition": "show tag values from \"diskSMARTTable\" with key=\"diskSMARTInfoDevName\" where \"agent_host\" =~ /$diskstation/",
+        "hide": 0,
+        "includeAll": false,
+        "label": "Disk Path",
+        "multi": true,
+        "name": "diskPath",
+        "options": [],
+        "query": "show tag values from \"diskSMARTTable\" with key=\"diskSMARTInfoDevName\" where \"agent_host\" =~ /$diskstation/",
         "refresh": 1,
         "regex": "",
         "skipUrlSync": false,
@@ -3678,7 +3475,7 @@
     ]
   },
   "time": {
-    "from": "now-30d",
+    "from": "now-6h",
     "to": "now"
   },
   "timepicker": {
@@ -3707,7 +3504,7 @@
     ]
   },
   "timezone": "browser",
-  "title": "Synology DashBoard",
-  "uid": "TIcL1_ezk",
-  "version": 69
+  "title": "Synology",
+  "uid": "kQOeG9lZz",
+  "version": 19
 }
