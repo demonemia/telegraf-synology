@@ -1,13 +1,13 @@
 FROM telegraf:latest
 
-RUN echo "deb http://ftp.us.debian.org/debian stretch main non-free" >> /etc/apt/sources.list \
+RUN echo "deb http://ftp.us.debian.org/debian bookworm main non-free" >> /etc/apt/sources.list \
   && apt-get update \
   && apt-get install -y --no-install-recommends \
-    iputils-ping \
-    snmp \
-    procps \
-    snmp-mibs-downloader \
-    unzip \
+  iputils-ping \
+  snmp \
+  procps \
+  snmp-mibs-downloader \
+  unzip \
   && rm -rf /var/lib/apt/lists/* \
   && rm -rf /etc/apt/sources.list.d/* \
   &&curl -sL https://global.download.synology.com/download/Document/MIBGuide/Synology_MIB_File.zip -o Synology_MIB_File.zip \
